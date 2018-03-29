@@ -1,0 +1,20 @@
+icache-mp:
+  incdirs: [
+    ../../rtl/includes,
+  ]
+  files: [
+    tile_ipa.sv,
+    alu_pe.sv,
+    regfile_pe.sv,
+    instmem_pe.sv,
+    constantregfile_pe.sv,
+    counter_pe.sv,
+    dma_ipa.sv,
+    contextmemory.sv,
+    cgra.sv,
+    orcond.sv,
+    cgra_clock_gating.sv,
+    ipa_cfg_mmap.sv,
+    ipa_wrap.sv,
+    dmac_ipa_wrap.sv 
+  ]
