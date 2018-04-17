@@ -11,7 +11,7 @@
 //                                                                            //
 // Create Date:    17/05/2016                                                 // 
 // Design Name:    CGRA                                                       // 
-// Module Name:    regfile (RRF)                                              //
+// Module Name:    regfile                                                    //
 // Project Name:                                                              //
 // Language:       SystemVerilog                                              //
 //                                                                            //

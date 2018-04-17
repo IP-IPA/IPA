@@ -58,11 +58,10 @@ module alu_pe #(parameter DWIDTH = 32)
 	 ALU_Out <= alu_in_prev;
 	 ALU_Cond <= '0;
       end else if(ALU_En == 1'b1) begin
-	 if(data_req_valid_i == 1'b1) begin
+	 if(Opcode == 5'b00111 && data_req_valid_i) begin//data_valid == 1'b1
 	    ALU_Out <= load_data_i;
 	    ALU_Cond <= 1'b0;
-	 end else if(data_valid == 1'b0) begin
-	    if(Opcode == 5'b00001) begin
+	 end else if(Opcode == 5'b00001) begin//if(data_valid == 1'b0) begin
 	       ALU_Out <= ALU_In0 + ALU_In1;
 	       ALU_Cond <= 1'b0;	
 	       
@@ -135,7 +134,7 @@ module alu_pe #(parameter DWIDTH = 32)
 	       ALU_Cond <= (ALU_In0 > ALU_In1)?1'b1:1'b0;	
 	       ALU_Out <= '0;
 	    end else if(Opcode == 5'b11000) begin
-	       ALU_Out <= '0;//(ALU_In0 / ALU_In1);	
+	       ALU_Out <= '0;	
 	       ALU_Cond <= '0;
 	    end else begin
 	       ALU_Cond <= 1'b0;
@@ -145,10 +144,12 @@ module alu_pe #(parameter DWIDTH = 32)
 	    ALU_Cond <= 1'b0;
 	    ALU_Out <= alu_in_prev;
 	 end	 
+/* -----\/----- EXCLUDED -----\/-----
       end else begin // if (ALU_En == 1'b1)
       
 	 ALU_Cond <= '0;
 	 ALU_Out <= alu_in_prev;
       end // else: !if(ALU_En == 1'b1)
+ -----/\----- EXCLUDED -----/\----- */
    end // always_comb begin
 endmodule // alu_pe

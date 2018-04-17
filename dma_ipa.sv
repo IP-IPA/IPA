@@ -15,7 +15,7 @@
 // Project Name:                                                              //
 // Language:       SystemVerilog                                              //
 //                                                                            //
-// Description:    IPAC                                                       //
+// Description:    DMA_CGRA                                                   //
 //                                                                            //
 //                                                                            //
 // Revision:                                                                  //
@@ -139,18 +139,30 @@ module dma_ipa #(parameter NB_ROWS = 4, parameter NB_COLS = 4, parameter GCM_ADD
 	    if(Inst_Fetch) begin
 	       Inst_Addr<=Inst_Addr+1;
 	       Inst_Count <= Inst_Count+64;
-    
+	       if(Inst_Number_Reg > 3 && Const_Number_Reg != 0) 
+		 begin
+//		    Context_Addr <=Context_Addr+1; 
+		 end
+	       else if(Inst_Number_Reg > 3 && Const_Number_Reg == 0)
+		 begin
+		    if(Inst_Count < (Inst_Number_Reg * 20)-64) 
+		      begin
+			 //Context_Addr <=Context_Addr+1;
+		      end
+		 end
+	    end else if(Const_Number_Reg == '0 ) begin //Inst_Count >= Inst_Number_Reg * 20 && 
+	       if(End_Tiles == 1'b0) begin
+		 	
+	       end else begin
+		  
+	       end
 	    end
 	    
 	    if(Const_Fetch) begin
 	       Const_Addr<=Const_Addr+1;
 	       Const_Count <= Const_Count+2;
-	       if(Const_Number_Reg != 1 && Const_Number_Reg != 0) begin 
-		  if((Const_Count < Const_Number_Reg-2)) begin 
-		     Context_Addr <=Context_Addr+1; 
-		  end 
-	       end
-	    end else if(Const_Count >= Const_Number_Reg-2 && Const_Number_Reg != '0) begin
+	       if(Const_Number_Reg != 1 && Const_Number_Reg != 0) begin if((Const_Count < Const_Number_Reg-2)) begin Context_Addr <=Context_Addr+1; end end
+	    end else if(Const_Count >= Const_Number_Reg-2 && Const_Number_Reg != '0) begin//Const_Count >= Const_Number_Reg-2 && 
 	       if(End_Tiles == 1'b0) begin
 		  //CS <= IN_ACCEPT;	
 	       end else begin
@@ -175,13 +187,22 @@ module dma_ipa #(parameter NB_ROWS = 4, parameter NB_COLS = 4, parameter GCM_ADD
       Write_En <= '0;
       Out_Data <= '0;
       Out_Addr <= '0;
-
+/* -----\/----- EXCLUDED -----\/-----
+      Mask <= '0;
+      Inst_Number_Reg <= '0;
+      Const_Number_Reg <= '0; 	
+      Const_Fetch <= '0;
+      Inst_Fetch <= '0;
+      NS<=IDLE;
+      Write_En <= '0;
+ -----/\----- EXCLUDED -----/\----- */
      
       //if(Context_Fetch_En == 1'b1) begin
       case(CS)
 	IDLE:
 	  begin
-	     	
+	     
+	    	
 	     Const_Fetch <= '0;
 	     Inst_Fetch <= '0;
 	     NS<=IDLE;
@@ -192,6 +213,7 @@ module dma_ipa #(parameter NB_ROWS = 4, parameter NB_COLS = 4, parameter GCM_ADD
 	  end
 	START:
 	  begin
+	     
 	     	
 	     Const_Fetch <= '0;
 	     Inst_Fetch <= '0;
@@ -203,29 +225,33 @@ module dma_ipa #(parameter NB_ROWS = 4, parameter NB_COLS = 4, parameter GCM_ADD
 	  begin
 	     ipa_gcm_req_o <= '1;
 	     if(In_Data[0] == 1'b0) begin
-
+		//Mask <= In_Data[16:1];
+		
 		NS <= MIDDLE; 	
 		Const_Fetch <= '0;
 		Inst_Fetch <= '0;
 		Write_En <= '0;
-
 	     end else if(In_Data[0] == 1'b1) begin
-
+		
+		
 		Const_Fetch <= '0;
 		Inst_Fetch <= '0;
-		NS <= MIDDLE;		
+		
+		NS <= MIDDLE;
+		
 		
 	     end // else: !if(In_Data[63] == 1'b0)
 	     
 	  end // case: IN_ACCEPT
 	MIDDLE:
 	  begin
-	     ipa_gcm_req_o <= '1;
+	     ipa_gcm_req_o <= '1;//(Inst_Number_Reg <= 3 ? (Inst_Count <= Inst_Number_Reg * 20):Inst_Count>0?((Inst_Count-64)<=Inst_Number_Reg * 20):1)
 	     if(Inst_Count <= (((Inst_Number_Reg == 96)||(Inst_Number_Reg == 80)||(Inst_Number_Reg == 48)||(Inst_Number_Reg == 32) || (Inst_Number_Reg == 64) || (Inst_Number_Reg == 128) ||  (Inst_Number_Reg == 16)|| (Inst_Number_Reg == 8)|| (Inst_Number_Reg == 4)|| (Inst_Number_Reg == 2)) ? ((Inst_Number_Reg-1) * 20) : (Inst_Number_Reg * 20))) begin
 		Out_Data <= In_Data;
 		Out_Addr[15:0] <= Mask;
 		Out_Addr[16] <= 1'b0;
 		Out_Addr[22:17] <= Inst_Addr;
+		//Write_En_Reg <= 1'b1; 
 		NS <= MIDDLE; 	  
 		Const_Fetch <= '0;
 		Inst_Fetch <= '1;

@@ -11,7 +11,7 @@
 //                                                                            //
 // Create Date:    17/05/2016                                                 // 
 // Design Name:    CGRA                                                       // 
-// Module Name:    constantregfile(CRF)                                       //
+// Module Name:    constantregfile                                            //
 // Project Name:                                                              //
 // Language:       SystemVerilog                                              //
 //                                                                            //
@@ -27,7 +27,7 @@
 //                                                                            //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-module constantregfile_pe #(parameter READ_AWIDTH = 4, parameter WRITE_AWIDTH = 4, parameter WRITE_DWIDTH = 64, parameter READ_DWIDTH = 32)
+module constantregfile_pe #(parameter READ_AWIDTH = 5, parameter WRITE_AWIDTH = 4, parameter WRITE_DWIDTH = 64, parameter READ_DWIDTH = 32)
    (
     input logic 		   Clk, Reset, Read_En_CRF_0, Read_En_CRF_1, Write_En,
     input logic [READ_AWIDTH-1:0]  Read_Addr_CRF_0, Read_Addr_CRF_1,

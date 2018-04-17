@@ -58,6 +58,27 @@ module cgra
 
    
    
+
+/* -----\/----- EXCLUDED -----\/-----
+ generate
+      for (i = 0; i< NB_ROWS; i++) begin
+	 for (j = 0; j< NB_COLS; j++) begin
+	    assign tile_id[i*NB_ROWS + j] = i*NB_ROWS + j;
+	    
+	 end
+      end
+ endgenerate
+
+ generate
+      for (i = 0; i< NB_ROWS; i++) begin
+	 for (j = 0; j< NB_COLS; j++) begin
+	    assign tile_id[i*NB_ROWS + j] = i*NB_ROWS + j;
+	    if (i*NB_ROWS+j < NB_LS) begin
+	 end
+      end
+ endgenerate
+ -----/\----- EXCLUDED -----/\----- */
+   
    generate
       for (i = 0; i< NB_ROWS; i++) begin
 	 for (j = 0; j< NB_COLS; j++) begin
