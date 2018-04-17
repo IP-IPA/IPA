@@ -368,7 +368,7 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
    alu_pe alu_pe(
 	    .Clk(Clk),
 	   .Reset(Reset),
-	   .ALU_En(1),
+	   .ALU_En('1),
 	   .alu_in_prev(alu_out_prev),
 	   .Exec_En_Global(exec),
 	   .load_data_i(Load_Data_I),

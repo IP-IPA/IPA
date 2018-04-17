@@ -75,7 +75,7 @@ module dma_ipa #(parameter NB_ROWS = 4, parameter NB_COLS = 4, parameter GCM_ADD
 	 CS <= START;
 	 Const_Number_Reg <= In_Data[16:12];
 	 Inst_Number_Reg <=In_Data[11:5];
-	 Context_Addr <= 1;
+	 Context_Addr <= 0;
 	 Nb_Tiles <= '0;
 	 
 	 Inst_Addr<= '0;

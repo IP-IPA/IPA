@@ -40,7 +40,7 @@ module ipa_wrap
    logic [NB_LS-1:0] [32-1:0] tcdm_wdata;
    logic [NB_LS-1:0] [32-1:0] tcdm_r_rdata;
    logic [NB_LS-1:0]          tcdm_r_valid;
-   logic 		      context_fetch_en;
+   logic 		      context_fetch_en, busy_ipac;
 
 
    logic [3:0][DATA_WIDTH-1:0]              s_dma_ipa_bus_wdata;
@@ -310,7 +310,7 @@ end // always_ff @ (posedge clk or negedge rst_n)
 	   .s_ipa_cfg_id(),
 	   .s_ipa_cfg_r_id(),
 	   .exec_comp(ipa_exec_complete),
-	   .busy_o(busy_o),
+	   .busy_o(busy_ipac),
 	   .read_valid(s_dma_ipa_bus_r_valid[3])
 	   );
    cgra 
