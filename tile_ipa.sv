@@ -48,10 +48,10 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 
    logic 				Exec_En, Clock_Gate_En_O, self_clock_gate_en, Load_Store_Req_Out, Load_Store_Data_Req_Out, Load_Store_Req, Load_Store_Data_Req;
 
-   //logic [3:0] 				Tile_Id_Reg;
+  
    logic                                ldstraddr_init;
    
-   logic [4:0] 				Read_Addr_CRF_0, Read_Addr_CRF_1;
+   logic [3:0] 				Read_Addr_CRF_0, Read_Addr_CRF_1;
    
    logic [4:0] 				Opcode;
    
@@ -79,20 +79,12 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
    logic [31:0] 			alu_out_prev, load_data, load_store_addr;
 
    logic 				exec;
-   
-/* -----\/----- EXCLUDED -----\/-----
-   always @ (Clk) 
-     begin
-	if (!Clk) begin
-	   en_out = enable; // build latch     
-	end
-     end
- -----/\----- EXCLUDED -----/\----- */
+ 
 
    integer 				active, inactive;
    
 
-/* -----\/----- LSU -----\/-----*/
+
    always_ff @(posedge Clk or negedge Reset)
      begin
 	if(Reset == 1'b0) begin
@@ -126,12 +118,9 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
    always_ff @(posedge Clk or negedge Reset)
      begin
 	if(Reset == 1'b0) begin
-	   active <= 0;
-	   inactive <= 0;
+	   
 	   ALU_En <= '0;
 	   Halt_Reg <= '1;
-	   //Load_Store_Req_O <= '0;
-	   //Load_Store_Data_Req_O<= '0;
 	   Load_Store_Req_Out <= '0;
 	   Load_Store_Data_Req_Out <= '0;
 	   end_exec <= 1'b1;
@@ -143,14 +132,6 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 	   
 	end else if (exec==1'b1) begin
 
-	   if( End_Exec_O == '0) begin
-	      if((Clock_Gate_En_O & (!Global_Stall)) == '1) begin
-		 active <= active + 1;
-	      end else begin
-		 inactive <= inactive + 1;
-	      end
-	   end
-
 	   ALU_En <= 1 & (!Global_Stall);
 	   ALU_Out_reg <=  (Data_Req_Valid_I == '1) ? Load_Data_I : ALU_Out;
 	   alu_out_prev <= (Data_Req_Valid_I == '1) ? Load_Data_I : ALU_Out;
@@ -159,27 +140,26 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 	     End_Exec_O <= 1'b1;
 	     end_exec <= 1'b0;	     
 	   end
-	   if((Inst_Data[4:0] == 5'b00111) && Clock_Gate_En_O == '1 && Load_Store_Grant_I == '0 ) begin // && Load_Store_Grant_I == '0  && Global_Stall != '1
+	   if((Inst_Data[4:0] == 5'b00111) && Clock_Gate_En_O == '1 && Load_Store_Grant_I == '0 ) begin 
 	      Load_Store_Req_Out <= 1'b1;
 	      Load_Store_Data_Req_Out <= 1'b1;
 	      
 	      
 	      
-	   end else if(Inst_Data[4:0] == 5'b01001   && Clock_Gate_En_O == '1 && Load_Store_Grant_I == '0  ) begin//Load_Store_Grant_I == '0 &&
+	   end else if(Inst_Data[4:0] == 5'b01001   && Clock_Gate_En_O == '1 && Load_Store_Grant_I == '0  ) begin
 	      Load_Store_Req_Out <= 1'b1;
 	      Load_Store_Data_Req_Out <= 1'b0;
               
 	      
 	      
-	   end else if(Load_Store_Grant_I == '1) begin//Data_Req_Valid_I
+	   end else if(Load_Store_Grant_I == '1) begin
 	      Load_Store_Data_Req_Out <= '0;
-	      Load_Store_Req_Out <= '0;
-	      
-	      
+	      Load_Store_Req_Out <= '0;	      
 	      
 	   end  
 	end else begin
 	   ALU_En <= '0;
+	   End_Exec_O <= '0;
 	end
      end // always_ff @ (posedge Clk or negedge Reset)
 
@@ -278,11 +258,9 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 
 	 Store_Data_O <= ALU_In0;
 	 Load_Store_Addr_O <= (ldstraddr_init == 0 && Load_Store_Req_Out == 1) ? ALU_In1<<2  : load_store_addr;
-	 Stall_Out <= Load_Store_Req_O ; //Load_Store_Data_Req_O ^ Data_Req_Valid_I;Load_Store_Grant_I ^ ^ Data_Req_Valid_I ^ Load_Store_Grant_I
-//(Data_Req_Valid_I ^ (Load_Store_Req_O))| Data_Req_Valid_I   ;//^ Data_Req_Valid_I; Load_Store_Grant_I; | Data_Req_Valid_I
+	 Stall_Out <= Load_Store_Req_O ;
 
-
-      end else begin // if (Exec_En==1'b1)
+      end else begin
 	 PE_Out_N <= '0;
 	 
 	 PE_Out_S <= '0;
@@ -309,19 +287,26 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 
 	 
 	 Store_Data_O <=  '0;
+	 
 	 Load_Store_Addr_O <= '0;
+	 
 	 Stall_Out <= 1'b0;
+	 
 	 ALU_In1 <= '0;
+	 
 	 ALU_In0 <= '0;
+	 
 	 ls_active <= '0;
+	 
 	 Counter_En <= '0;
+	 
 	 Count_Nop <= '0;
 	
       end // else: !if(Exec_En_Global==1'b1)
 
    end
-   assign Load_Store_Data_Req_O = Load_Store_Data_Req_Out; //Load_Store_Data_Req | Load_Store_Data_Req_Out;
-   assign Load_Store_Req_O      = Load_Store_Req_Out; //Load_Store_Req_Out | Load_Store_Req;
+   assign Load_Store_Data_Req_O = Load_Store_Data_Req_Out;
+   assign Load_Store_Req_O      = Load_Store_Req_Out;
 
    
    constantregfile_pe constantregfile_pe(
@@ -330,10 +315,10 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 				   .In_Const(DMA_Data_In),
 				   .Write_En((DMA_Addr_In[Tile_Id] == 1'b1) && (DMA_Addr_In[16] == 1) ? DMA_Read_En : 1'b0),
 				   .Read_En_CRF_0(Read_En_CRF_0),
-				   .Read_Addr_CRF_0(Read_Addr_CRF_0),
+				   .Read_Addr_CRF_0({1'b0,Read_Addr_CRF_0}),
 				   .Read_Data_CRF_0(PE_In_CRF_0),
 				   .Read_En_CRF_1(Read_En_CRF_1),
-				   .Read_Addr_CRF_1(Read_Addr_CRF_1),
+				   .Read_Addr_CRF_1({1'b0,Read_Addr_CRF_1}),
 				   .Read_Data_CRF_1(PE_In_CRF_1),
 				   .Write_Addr(DMA_Addr_In[20:17])	      
 				   );
@@ -399,15 +384,6 @@ module tile_ipa #(parameter AWIDTH = 4, parameter DWIDTH = 32, parameter INST_AW
 		      .Clock_Gate_En_O(Clock_Gate_En_O),
 		      .Data_In(Count_Nop)
 		      );
-
-/* -----\/----- EXCLUDED -----\/-----
-   cluster_clock_gating clk_gate(
-				 .clk_i(Clk),
-				 .en_i(!Global_Stall),
-				 .test_en_i(1'b0),
-				 .clk_o(gated_clk)
-				 );
- -----/\----- EXCLUDED -----/\----- */
 
 
    cgra_clock_gating counter_gate_pe(

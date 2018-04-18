@@ -40,8 +40,7 @@ module constantregfile_pe #(parameter READ_AWIDTH = 5, parameter WRITE_AWIDTH = 
    
 
    logic [Num_Regs-1:0][63:0] 	   Mem_Content ;
-   //logic [READ_DWIDTH-1:0] Read_Data0_reg;
-   //logic [READ_DWIDTH-1:0] Read_Data1_reg;
+   
 
    always_ff @(posedge Clk or negedge Reset)
      begin

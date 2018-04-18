@@ -40,7 +40,7 @@ module ipa_wrap
    logic [NB_LS-1:0] [32-1:0] tcdm_wdata;
    logic [NB_LS-1:0] [32-1:0] tcdm_r_rdata;
    logic [NB_LS-1:0]          tcdm_r_valid;
-   logic 		      context_fetch_en, busy_ipac;
+   logic 		      context_fetch_en;
 
 
    logic [3:0][DATA_WIDTH-1:0]              s_dma_ipa_bus_wdata;
@@ -85,21 +85,10 @@ module ipa_wrap
    logic  		  s_ipa_cfg_valid;
    logic [4:0] 	          s_ipa_cfg_r_id;
 
-   logic                  ipa_gcm_req_o;
+   logic                  ipa_gcm_req_o, ipa_busy;
 
 
-logic s_ipa_cfg_gnt_fasttoslow, s_ipa_cfg_valid_fasttoslow;
-always_ff @(posedge clk or negedge rst_n) begin
-   if(rst_n == 0) begin
-      s_ipa_cfg_gnt_fasttoslow <= 0;
-      s_ipa_cfg_valid_fasttoslow <= 0;
-      
-   end else begin
-      s_ipa_cfg_gnt_fasttoslow <= s_ipa_cfg_gnt;
-      s_ipa_cfg_valid_fasttoslow <= s_ipa_cfg_valid;
-      
-   end
-end // always_ff @ (posedge clk or negedge rst_n)
+
 
    assign s_ipa_cfg_add     = ipa_cfg_slave.add;
    assign s_ipa_cfg_req     = ipa_cfg_slave.req;
@@ -108,9 +97,9 @@ end // always_ff @ (posedge clk or negedge rst_n)
    assign s_ipa_cfg_be      = ipa_cfg_slave.be;
    assign s_ipa_cfg_id      = ipa_cfg_slave.id;
 	   
-   assign ipa_cfg_slave.gnt     = s_ipa_cfg_gnt | s_ipa_cfg_gnt_fasttoslow;
+   assign ipa_cfg_slave.gnt     = s_ipa_cfg_gnt;
    assign ipa_cfg_slave.r_opc   = 'b0;
-   assign ipa_cfg_slave.r_valid = s_ipa_cfg_valid | s_ipa_cfg_valid_fasttoslow;
+   assign ipa_cfg_slave.r_valid = s_ipa_cfg_valid;
    assign ipa_cfg_slave.r_rdata = s_ipa_cfg_rdata;//32'hdeadbeef;
    assign ipa_cfg_slave.r_id    = s_ipa_cfg_r_id;//'0;
 
@@ -137,7 +126,7 @@ end // always_ff @ (posedge clk or negedge rst_n)
       if(rst_n == '0) begin
 	 busy_o <= '0;
       end else if(context_fetch_en == 1) begin
-	 busy_o <= '1;
+	 busy_o <= '1 | ipa_busy;
       end else if(ipa_exec_complete == 1) begin
 	 busy_o <= '0;
       end
@@ -229,7 +218,7 @@ end // always_ff @ (posedge clk or negedge rst_n)
 	begin
 	   assign ipa_gcm_req   [i] = ipa_gcm_req_o;
 	   assign ipa_gcm_wen   [i] = ipa_gcm_req_o;
-	   assign gcm_req_Addr  [i] = Context_Addr;//assign Context_Data[31+(32*i):0+(32*i)]=s_tcdm_bus_sram_rdata[i];
+	   assign gcm_req_Addr  [i] = Context_Addr;
 	   if(i == 0) begin
 	      assign Context_Data[63:32]=s_tcdm_bus_sram_rdata[i];
 	   end else begin
@@ -310,7 +299,7 @@ end // always_ff @ (posedge clk or negedge rst_n)
 	   .s_ipa_cfg_id(),
 	   .s_ipa_cfg_r_id(),
 	   .exec_comp(ipa_exec_complete),
-	   .busy_o(busy_ipac),
+	   .busy_o(ipa_busy),
 	   .read_valid(s_dma_ipa_bus_r_valid[3])
 	   );
    cgra 
